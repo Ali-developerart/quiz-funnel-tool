@@ -1,16 +1,15 @@
 import { useState } from 'react';
-import { ChevronRight, CheckCircle, ArrowRight, Star } from 'lucide-react';
+import { CheckCircle, ArrowRight, Zap, Target, Clock, Sparkles } from 'lucide-react';
 import './index.css';
 
 interface Question {
   id: number;
   question: string;
-  answers: string[];
-  category: string;
+  options: string[];
+  scores: number[];
 }
 
 interface Result {
-  score: number;
   level: string;
   title: string;
   description: string;
@@ -18,256 +17,203 @@ interface Result {
   color: string;
 }
 
-const QUESTIONS: Question[] = [
+const questions: Question[] = [
   {
     id: 1,
-    question: 'Wie viel Umsatz machst du monatlich?',
-    answers: ['< 5.000€', '5.000€ - 25.000€', '25.000€ - 100.000€', '> 100.000€'],
-    category: 'revenue'
+    question: "Wie viele Besucher hat deine Website monatlich?",
+    options: ["< 1.000", "1.000 - 10.000", "10.000 - 100.000", "> 100.000"],
+    scores: [1, 2, 3, 4]
   },
   {
     id: 2,
-    question: 'Wie viele Stunden pro Woche investierst du in dein Business?',
-    answers: ['< 10h', '10-20h', '20-40h', '> 40h'],
-    category: 'time'
+    question: "Wie ist deine aktuelle Konversionsrate?",
+    options: ["Keine Ahnung", "< 1%", "1-3%", "> 3%"],
+    scores: [1, 2, 3, 4]
   },
   {
     id: 3,
-    question: 'Wie viele Leads generierst du monatlich?',
-    answers: ['0-10', '10-50', '50-200', '> 200'],
-    category: 'leads'
+    question: "Hast du einen Sales Funnel?",
+    options: ["Nein", "Teilweise", "Ja, aber nicht optimiert", "Ja, und gut optimiert"],
+    scores: [1, 2, 3, 4]
   },
   {
     id: 4,
-    question: 'Wie ist deine aktuelle Conversion-Rate?',
-    answers: ['< 1%', '1-3%', '3-10%', '> 10%'],
-    category: 'conversion'
+    question: "Nutzt du Email-Marketing?",
+    options: ["Nein", "Gelegentlich", "Regelmäßig", "Automatisiert & optimiert"],
+    scores: [1, 2, 3, 4]
   },
   {
     id: 5,
-    question: 'Nutzt du bereits Marketing-Automation?',
-    answers: ['Nein, gar nicht', 'Minimal', 'Teilweise', 'Vollständig'],
-    category: 'automation'
+    question: "Wie viel Budget für Marketing?",
+    options: ["Kein Budget", "< 500€/Monat", "500-2000€/Monat", "> 2000€/Monat"],
+    scores: [1, 2, 3, 4]
   },
   {
     id: 6,
-    question: 'Wie zufrieden bist du mit deinem aktuellen Geschäftswachstum?',
-    answers: ['Sehr unzufrieden', 'Unzufrieden', 'Zufrieden', 'Sehr zufrieden'],
-    category: 'satisfaction'
+    question: "Dein Geschäftsziel?",
+    options: ["Lernen", "Wachstum", "Skalierung", "Marktführerschaft"],
+    scores: [1, 2, 3, 4]
   }
 ];
 
-const getResults = (scores: number[]): Result => {
-  const totalScore = scores.reduce((a, b) => a + b, 0);
-  const avgScore = totalScore / scores.length;
-
-  if (avgScore < 1.5) {
-    return {
-      score: totalScore,
-      level: 'Starter',
-      title: '🚀 Starter Phase',
-      description: 'Du hast großes Potenzial! Jetzt ist der richtige Zeitpunkt, um die Grundlagen zu optimieren.',
-      recommendations: [
-        'Implementiere ein Lead-Capture-System',
-        'Erstelle deine erste Sales Funnel',
-        'Automatisiere deine E-Mail-Kommunikation',
-        'Definiere deine Zielgruppe klar'
-      ],
-      color: 'from-blue-500 to-cyan-500'
-    };
-  } else if (avgScore < 2.5) {
-    return {
-      score: totalScore,
-      level: 'Growth',
-      title: '📈 Growth Phase',
-      description: 'Du machst gute Fortschritte! Fokussiere dich auf Skalierung und Optimierung.',
-      recommendations: [
-        'Optimiere deine Conversion-Funnels',
-        'Implementiere A/B-Testing',
-        'Skaliere deine Marketing-Ausgaben',
-        'Baue ein Team auf'
-      ],
-      color: 'from-purple-500 to-pink-500'
-    };
-  } else if (avgScore < 3.5) {
-    return {
-      score: totalScore,
-      level: 'Scale',
-      title: '⚡ Scale Phase',
-      description: 'Beeindruckend! Du bist bereit, dein Business zu skalieren.',
-      recommendations: [
-        'Implementiere erweiterte Analytics',
-        'Automatisiere deine gesamte Funnel',
-        'Skaliere dein Team und Prozesse',
-        'Erkunde neue Märkte und Produkte'
-      ],
-      color: 'from-orange-500 to-red-500'
-    };
-  } else {
-    return {
-      score: totalScore,
-      level: 'Enterprise',
-      title: '👑 Enterprise Level',
-      description: 'Du bist ein Top-Performer! Fokussiere dich auf Innovation und Marktführerschaft.',
-      recommendations: [
-        'Entwickle ein Signature-System',
-        'Baue dein Personal Brand auf',
-        'Investiere in strategische Partnerschaften',
-        'Schaffe ein Vermächtnis'
-      ],
-      color: 'from-yellow-500 to-orange-500'
-    };
+const results: Record<number, Result> = {
+  6: {
+    level: "Anfänger",
+    title: "Du fängst gerade an 🌱",
+    description: "Du hast großes Potenzial! Mit den richtigen Strategien kannst du schnell wachsen.",
+    recommendations: [
+      "Starte mit einer einfachen Landing Page",
+      "Baue eine Email-Liste auf",
+      "Implementiere Basis-Analytics",
+      "Lerne die Funnel-Grundlagen"
+    ],
+    color: "from-blue-500 to-cyan-500"
+  },
+  12: {
+    level: "Fortgeschritten",
+    title: "Du machst gute Fortschritte 📈",
+    description: "Du hast bereits eine solide Basis. Jetzt geht es um Optimierung und Skalierung.",
+    recommendations: [
+      "Optimiere deine Konversionsrate",
+      "Teste verschiedene Messaging-Varianten",
+      "Automatisiere deine Prozesse",
+      "Skaliere deine Kampagnen"
+    ],
+    color: "from-purple-500 to-pink-500"
+  },
+  18: {
+    level: "Experte",
+    title: "Du bist auf dem richtigen Weg 🚀",
+    description: "Du hast bereits gute Systeme. Fokussiere dich auf Skalierung und Automatisierung.",
+    recommendations: [
+      "Implementiere Advanced-Analytics",
+      "Nutze AI für Personalisierung",
+      "Skaliere auf mehrere Kanäle",
+      "Baue ein Team auf"
+    ],
+    color: "from-green-500 to-emerald-500"
+  },
+  24: {
+    level: "Master",
+    title: "Du bist ein Funnel-Master! 👑",
+    description: "Beeindruckend! Du hast ein hochoptimiertes System. Jetzt geht es um Marktführerschaft.",
+    recommendations: [
+      "Entwickle proprietary Strategien",
+      "Mentoriere andere Marketer",
+      "Baue ein 7-stelliges Business",
+      "Werden Sie Thought Leader"
+    ],
+    color: "from-yellow-500 to-orange-500"
   }
 };
 
-export default function App() {
+function App() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [scores, setScores] = useState<number[]>([]);
   const [email, setEmail] = useState('');
-  const [showResults, setShowResults] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [showResult, setShowResult] = useState(false);
 
-  const handleAnswer = (answerIndex: number) => {
-    const newScores = [...scores, answerIndex];
+  const handleAnswer = (score: number) => {
+    const newScores = [...scores, score];
     setScores(newScores);
 
-    if (currentQuestion < QUESTIONS.length - 1) {
+    if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     } else {
-      setShowResults(true);
+      setShowResult(true);
     }
   };
 
-  const handleSubmitResults = (e: React.FormEvent) => {
-    e.preventDefault();
-    const result = getResults(scores);
-    const leadData = {
-      email,
-      level: result.level,
-      score: result.score,
-      timestamp: new Date().toISOString(),
-      answers: QUESTIONS.map((q, i) => ({
-        question: q.question,
-        answer: q.answers[scores[i]]
-      }))
-    };
-    console.log('Lead submitted:', leadData);
-    setSubmitted(true);
+  const getTotalScore = () => scores.reduce((a, b) => a + b, 0);
+  const getResult = (): Result => {
+    const total = getTotalScore();
+    if (total <= 6) return results[6];
+    if (total <= 12) return results[12];
+    if (total <= 18) return results[18];
+    return results[24];
   };
 
-  const result = getResults(scores);
-  const progress = ((currentQuestion + 1) / QUESTIONS.length) * 100;
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Lead captured:", { email, score: getTotalScore() });
+    setCurrentQuestion(0);
+    setScores([]);
+    setEmail('');
+    setShowResult(false);
+  };
 
-  if (submitted) {
+  if (showResult) {
+    const result = getResult();
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center px-4">
-        <div className="max-w-md text-center text-white">
-          <div className="mb-6 flex justify-center">
-            <div className="bg-green-500/20 rounded-full p-4">
-              <CheckCircle className="w-12 h-12 text-green-400" />
-            </div>
-          </div>
-          <h2 className="text-3xl font-bold mb-2">Danke!</h2>
-          <p className="text-gray-300 mb-6">
-            Dein personalisierter Bericht wird in Kürze an {email} versendet.
-          </p>
-          <button 
-            onClick={() => {
-              setCurrentQuestion(0);
-              setScores([]);
-              setEmail('');
-              setShowResults(false);
-              setSubmitted(false);
-            }}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition"
-          >
-            Quiz erneut starten
-          </button>
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 text-white">
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-pink-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
         </div>
-      </div>
-    );
-  }
 
-  if (showResults) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white py-12 px-4">
-        <div className="max-w-2xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold mb-4">Dein Ergebnis</h1>
-            <p className="text-gray-300">Basierend auf deinen Antworten</p>
-          </div>
-
-          {/* Result Card */}
-          <div className={`bg-gradient-to-br ${result.color} rounded-2xl p-1 mb-8`}>
-            <div className="bg-slate-900 rounded-2xl p-8">
-              <div className="text-center mb-8">
-                <h2 className="text-5xl font-bold mb-2">{result.title}</h2>
-                <p className="text-gray-300 text-lg">{result.description}</p>
+        <div className="relative z-10 max-w-2xl mx-auto px-6 py-20">
+          <div className={`bg-gradient-to-br ${result.color} rounded-2xl p-12 text-center mb-8 shadow-2xl`}>
+            <div className="mb-6 flex justify-center">
+              <div className="bg-white/20 rounded-full p-6 backdrop-blur-sm">
+                <CheckCircle className="w-16 h-16 text-white" />
               </div>
-
-              <div className="bg-slate-800/50 rounded-xl p-6 mb-8">
-                <div className="text-center mb-4">
-                  <p className="text-gray-400 text-sm mb-2">Dein Score</p>
-                  <p className="text-5xl font-bold">{result.score}/24</p>
-                </div>
-                <div className="w-full bg-slate-700 rounded-full h-3">
-                  <div 
-                    className={`bg-gradient-to-r ${result.color} h-3 rounded-full transition-all duration-500`}
-                    style={{ width: `${(result.score / 24) * 100}%` }}
-                  ></div>
-                </div>
-              </div>
-
-              <div className="mb-8">
-                <h3 className="text-xl font-bold mb-4">Deine Empfehlungen:</h3>
-                <ul className="space-y-3">
-                  {result.recommendations.map((rec, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
-                      <span>{rec}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Lead Capture */}
-              <form onSubmit={handleSubmitResults} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Erhalte deinen detaillierten Bericht
-                  </label>
-                  <input
-                    type="email"
-                    placeholder="deine@email.de"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="w-full bg-slate-800 border border-purple-500/30 rounded-lg px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2"
-                >
-                  Bericht erhalten <ArrowRight className="w-4 h-4" />
-                </button>
-              </form>
-
-              <p className="text-xs text-gray-400 text-center mt-4">
-                Wir respektieren deine Privatsphäre. Keine Spam.
-              </p>
+            </div>
+            <h1 className="text-4xl font-bold text-white mb-4">{result.title}</h1>
+            <p className="text-xl text-white/90 mb-8">{result.description}</p>
+            <div className="bg-white/10 rounded-lg p-6 backdrop-blur-sm border border-white/20">
+              <p className="text-sm text-white/80 mb-2">Dein Level:</p>
+              <p className="text-3xl font-bold text-white">{result.level}</p>
+              <p className="text-sm text-white/80 mt-2">Score: {getTotalScore()}/24</p>
             </div>
           </div>
 
-          {/* Additional CTA */}
-          <div className="bg-slate-800/50 rounded-xl p-6 text-center">
-            <h3 className="text-xl font-bold mb-2">Bereit für die nächsten Schritte?</h3>
-            <p className="text-gray-300 mb-4">
-              Buche ein kostenloses Strategie-Gespräch mit einem unserer Experten
+          <div className="bg-slate-800/50 border border-purple-500/30 rounded-2xl p-8 mb-8">
+            <h2 className="text-2xl font-bold mb-6">Deine nächsten Schritte:</h2>
+            <ul className="space-y-4">
+              {result.recommendations.map((rec, i) => (
+                <li key={i} className="flex items-start gap-3">
+                  <ArrowRight className="w-5 h-5 text-purple-400 flex-shrink-0 mt-1" />
+                  <span className="text-gray-200">{rec}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30 rounded-2xl p-8">
+            <h3 className="text-2xl font-bold mb-4">Erhalte dein personalisiertes Aktionsplan</h3>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <input
+                type="email"
+                placeholder="deine@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full bg-slate-800/50 border border-purple-500/30 rounded-lg px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500"
+              />
+              <button
+                type="submit"
+                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 rounded-lg transition-all hover:shadow-lg hover:shadow-purple-500/50"
+              >
+                Aktionsplan erhalten
+              </button>
+            </form>
+            <p className="text-sm text-gray-400 mt-4 text-center">
+              ✓ Kostenlos • ✓ Keine Spam • ✓ Sofort Zugriff
             </p>
-            <button className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-semibold transition">
-              Termin buchen
+          </div>
+
+          <div className="text-center mt-8">
+            <button
+              onClick={() => {
+                setCurrentQuestion(0);
+                setScores([]);
+                setEmail('');
+                setShowResult(false);
+              }}
+              className="text-purple-400 hover:text-purple-300 transition flex items-center gap-2 mx-auto"
+            >
+              <ArrowRight className="w-4 h-4" />
+              Quiz neu starten
             </button>
           </div>
         </div>
@@ -275,66 +221,76 @@ export default function App() {
     );
   }
 
+  const progress = ((currentQuestion + 1) / questions.length) * 100;
+  const question = questions[currentQuestion];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white py-12 px-4">
-      <div className="max-w-2xl mx-auto">
-        {/* Header */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 text-white">
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-pink-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+      </div>
+
+      <div className="relative z-10 max-w-2xl mx-auto px-6 py-20">
         <div className="text-center mb-12">
-          <div className="inline-block mb-4 px-4 py-2 bg-purple-500/20 rounded-full border border-purple-500/50">
-            <span className="text-sm font-semibold text-purple-300">📊 Kostenlos & Unverbindlich</span>
+          <div className="inline-block mb-4">
+            <span className="px-4 py-2 rounded-full bg-purple-500/20 border border-purple-500/50 text-purple-300 text-sm font-semibold flex items-center gap-2">
+              <Sparkles className="w-4 h-4" />
+              Funnel Potential Quiz
+            </span>
           </div>
           <h1 className="text-4xl font-bold mb-4">
-            Finde dein Business-Wachstumspotential
+            Wie bereit bist du für <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Skalierung?</span>
           </h1>
-          <p className="text-gray-300 text-lg">
-            Beantworte 6 Fragen und erhalte personalisierte Empfehlungen für dein Business
+          <p className="text-gray-400 text-lg">
+            Finde in 2 Minuten heraus, auf welchem Level du bist
           </p>
         </div>
 
-        {/* Progress Bar */}
         <div className="mb-8">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm text-gray-400">Frage {currentQuestion + 1} von {QUESTIONS.length}</span>
-            <span className="text-sm text-purple-400 font-semibold">{Math.round(progress)}%</span>
+            <span className="text-sm text-gray-400">Frage {currentQuestion + 1} von {questions.length}</span>
+            <span className="text-sm font-semibold text-purple-400">{Math.round(progress)}%</span>
           </div>
-          <div className="w-full bg-slate-700 rounded-full h-2">
-            <div 
-              className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-500"
+          <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+            <div
+              className="bg-gradient-to-r from-purple-500 to-pink-500 h-full transition-all duration-500"
               style={{ width: `${progress}%` }}
             ></div>
           </div>
         </div>
 
-        {/* Question Card */}
-        <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-2xl border border-purple-500/30 p-1 mb-8 animate-slide-up">
-          <div className="bg-slate-800/80 backdrop-blur-sm rounded-2xl p-8">
-            <h2 className="text-2xl font-bold mb-8">{QUESTIONS[currentQuestion].question}</h2>
-
-            <div className="space-y-3">
-              {QUESTIONS[currentQuestion].answers.map((answer, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleAnswer(index)}
-                  className="w-full text-left p-4 rounded-lg border-2 border-purple-500/30 hover:border-purple-500 hover:bg-purple-500/10 transition group cursor-pointer"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium group-hover:text-purple-300 transition">{answer}</span>
-                    <ChevronRight className="w-5 h-5 text-purple-400 opacity-0 group-hover:opacity-100 transition transform group-hover:translate-x-1" />
-                  </div>
-                </button>
-              ))}
-            </div>
+        <div className="bg-slate-800/50 border border-purple-500/30 rounded-2xl p-8 mb-8">
+          <h2 className="text-2xl font-bold mb-8">{question.question}</h2>
+          
+          <div className="space-y-4">
+            {question.options.map((option, index) => (
+              <button
+                key={index}
+                onClick={() => handleAnswer(question.scores[index])}
+                className="w-full text-left p-4 rounded-lg border border-purple-500/30 hover:border-purple-500/60 bg-slate-700/30 hover:bg-slate-700/60 transition-all group"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-lg group-hover:text-purple-300 transition">{option}</span>
+                  <ArrowRight className="w-5 h-5 text-purple-400 opacity-0 group-hover:opacity-100 transition" />
+                </div>
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Social Proof */}
-        <div className="text-center">
-          <p className="text-gray-400 text-sm mb-4">Vertraut von über 1000 Unternehmern</p>
-          <div className="flex justify-center gap-1">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-            ))}
-            <span className="text-sm text-gray-400 ml-2">4.9/5 Bewertung</span>
+        <div className="grid grid-cols-3 gap-4 text-center text-sm">
+          <div className="bg-slate-800/50 border border-purple-500/30 rounded-lg p-4">
+            <Clock className="w-5 h-5 text-purple-400 mx-auto mb-2" />
+            <p className="text-gray-400">2 Minuten</p>
+          </div>
+          <div className="bg-slate-800/50 border border-purple-500/30 rounded-lg p-4">
+            <Target className="w-5 h-5 text-purple-400 mx-auto mb-2" />
+            <p className="text-gray-400">6 Fragen</p>
+          </div>
+          <div className="bg-slate-800/50 border border-purple-500/30 rounded-lg p-4">
+            <Zap className="w-5 h-5 text-purple-400 mx-auto mb-2" />
+            <p className="text-gray-400">Kostenlos</p>
           </div>
         </div>
       </div>
@@ -342,3 +298,4 @@ export default function App() {
   );
 }
 
+export default App;
